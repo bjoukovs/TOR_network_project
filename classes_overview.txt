@@ -1,0 +1,43 @@
+Fichiers:
+config/topology.ini
+config/host.ini
+
+Classes:
+- Relay
+- Message
+    - Sous-classe par type de message
+	- KEY_INIT:
+		version type=0 msg_length
+		key_id (32 bits)
+		g parameter
+		p parameter (1024 bits)
+		A value (1024 bits)
+	- KEY_REPLY:
+		version type=1 msg_length
+		key_id (32 bits)
+		B value (1024 bits)
+	- MESSAGE_RELAY:
+		version
+		type=2
+		sequence number
+		key_id (32 bits)
+		next_hop (32 bits)
+		payload (inner onion)
+		padding (optional)
+	- ERROR:
+		version
+		type=3
+		msg_length
+		error_code
+		padding	
+
+- Peer (Alice ou Bob)
+	- Clef
+	- IP
+	- Port
+
+Fonctions:
+- Main
+- Security
+- Dijkstra (pathfinding)
+
