@@ -1,0 +1,20 @@
+﻿Voir les status
+
+>>git status
+
+Ajouter les modifications
+
+>>git add -A
+>>git commit -c "message"
+>>git push origin master
+
+Télécharger les modifications
+
+>>git pull
+
+Pour tout reset
+
+git fetch origin master
+git reset --hard FETCH_HEAD
+git clean -df
+git pull
