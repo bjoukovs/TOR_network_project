@@ -6,10 +6,10 @@ class Relay:
         self.port=port
         self.neighbors=[]
 
-    def connect(self,target_relay,cost,sync):
+    def connect(self,target_relay,sync):
         cost=randint(1,9)
         sync=sync+1
-        self.neighbors.append(target_relay,cost)
-        if relay <=1:
-            target_relay.connect(self,)
+        self.neighbors.append([target_relay,cost])
+        if sync <=1:
+            target_relay.connect(self,sync)
         return 0
