@@ -2,14 +2,23 @@ from random import randint
 
 class Relay:
     def __init__(self,ip,port):
-        self.ip=ip
-        self.port=port
-        self.neighbors=[]
+        self._ip=ip
+        self._port=port
+        self._neighbors_costs={}
 
-    def connect(self,target_relay,sync):
-        cost=randint(1,9)
+    def connect(self,target_relay,sync,cost=0):
+        
         sync=sync+1
-        self.neighbors.append([target_relay,cost])
         if sync <=1:
-            target_relay.connect(self,sync)
-        return 0
+            cost=randint(1,9)
+            target_relay.connect(self,sync,cost)
+
+        self._neighbors_costs[target_relay] = cost
+
+
+    @property
+    def neighbors(self):
+        return self._neighbors_costs
+
+    def get_cost(self,neighbor):
+        return self._neighbors_costs[neighbor]
