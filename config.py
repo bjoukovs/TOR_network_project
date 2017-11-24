@@ -20,7 +20,7 @@ def read_config():
     lecture_mode = 0
 
     #Lecture des relais
-    for line in host_config:
+    for line in topology_config:
         if line=="[relays]":
             lecture_mode = 1
         elif line=="[topology]":
