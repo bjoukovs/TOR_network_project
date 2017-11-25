@@ -11,6 +11,7 @@ from Crypto.Cipher import AES
 import hashlib
 from Crypto import Random
 import base64
+from Crypto.Util import number
 
 # not protected
 # p prime nb
@@ -24,21 +25,31 @@ def DH_exchange(base,secret,prime_nb):
     Computes the Diffie-Hellmann exchange value. This value is to be send to the target.
     It takes in arguments the agreed base and prime number as well as the secret.
     """
-    return (base**secret)%prime_nb
+    #return (base**secret)%prime_nb # A=g^a mod p   ou  B=g^b mod p
+    return pow(base,secret)%prime_nb # A=g^a mod p   ou  B=g^b mod p
 
-def DH_shared_secret(exchange,secret,prime_nb):
-    """
-    Computes the Diffie-Hellmann shared secret using the exchange value received from the sender,
-    the secret of the receiver and the agreed prime number.
-    """
-    return (exchange**secret)%prime_nb
+    # utiliser la commande pow est bcp plus rapide
 
+def DH_shared_secret(exchange_sender,secret_receiver,prime_nb):
+    """
+    Computes the Diffie-Hellmann shared secret using the exchange value received from the SENDER,
+    the secret of the RECEIVER and the agreed prime number.
+    """
+    #return (exchange_sender**secret_receiver)%prime_nb  #=K_A=A^b mod p    ou   K_B=B^a mod p
+    return (pow(exchange_sender,secret_receiver))%prime_nb  #=K_A=A^b mod p    ou   K_B=B^a mod p
+
+
+def generate_prime_nb(bits):
+    return number.getPrime(bits)
+
+def generate_random_nb(bits):
+    return number.getRandomInteger(bits)
 
 class AESCipher(object):
 
-    def __init__(self, key):
+    def __init__(self, key): 
         self.bs = 32
-        self.key = hashlib.sha256(key.encode()).digest()
+        self.key = hashlib.sha256(key.encode('utf-8')).digest()
 
     def encrypt(self, raw):
         raw = self._pad(raw)
