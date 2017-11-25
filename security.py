@@ -45,6 +45,34 @@ def generate_prime_nb(bits):
 def generate_random_nb(bits):
     return number.getRandomInteger(bits)
 
+
+## code perso pour le cryptage
+def encrypt(key,message):
+    iv=generate_random_nb(128)  #ATTENTION ARBITRARY CHOICE OF 128 BITS FOR IV, IS IT OK?
+    iv=str(iv)
+    message=pad(message)
+    obj=AES.new(key.encode('utf-8'), AES.MODE_CBC, iv.encode('utf-8'))
+    ciphertext=obj.encrypt(message.encode('utf-8'))
+    return [ciphertext,iv]
+
+def decrypt(key,iv,ciphertext):
+    obj2=AES.new(key.encode('utf-8'), AES.MODE_CBC, iv.encode('utf-8'))
+    decrypted_msg=obj2.decrypt(ciphertext)
+    decrypted_msg=unpad(decrypted_msg)
+    return decrypted_msg
+
+def pad(s):
+    bs=32
+    return s + (bs - len(s) % bs) * chr(bs - len(s) % bs)
+def unpad(s):
+    return s[:-ord(s[len(s)-1:])]
+##
+
+
+
+
+
+""" Code de stackoverflow --> bug
 class AESCipher(object):
 
     def __init__(self, key): 
@@ -69,3 +97,4 @@ class AESCipher(object):
     @staticmethod
     def _unpad(s):
         return s[:-ord(s[len(s)-1:])]
+"""

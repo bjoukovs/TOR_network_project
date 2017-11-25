@@ -1,5 +1,24 @@
 from security import *
 from Crypto.Cipher import AES
+import math as m
+
+################ Working example ####################################################################
+obj = AES.new('This is a key123'.encode('utf-8'), AES.MODE_CBC, 'This is an IV456'.encode('utf-8'))
+message = "The answer is no".encode('utf-8')
+print('Message:',message)
+ciphertext = obj.encrypt(message)
+print('Ciphered message:',ciphertext)
+
+obj2 = AES.new('This is a key123'.encode('utf-8'), AES.MODE_CBC, 'This is an IV456'.encode('utf-8')) #attention iv must be the same as used for encryption
+print('Decrypted message:',obj2.decrypt(ciphertext))
+#####################################################################################################
+
+
+"""
+############### Using security file (not working for now) #################################################################
+
+#erreurs: incorrect AES key size --> solved if size adjusted with while
+#         ValueError: Error 65537 while instatiating the CBC mode --> not solved
 
 p=generate_prime_nb(1024)
 g=2
@@ -13,19 +32,26 @@ B=DH_exchange(g,b,p)
 
 key=DH_shared_secret(A,b,p)
 
-# IV generation
-iv = Random.new().read(16)
-iv=iv.encode('utf-8')
-# test key
-key='123'.encode('utf-8')
-# Encryption
-encryption_suite = AES.new('123', AES.MODE_CBC, '456')
-cipher_text = encryption_suite.encrypt("A really secret message. Not for prying eyes.")
+## to adjust bit size of key if needed
+taille=104
+while(key.bit_length()!=taille):
+    key=m.floor(key/2)
+##
 
-# Decryption
-decryption_suite = AES.new('123', AES.MODE_CBC, '456')
-plain_text = decryption_suite.decrypt(cipher_text)
+print(key.bit_length())
 
-##encipherer=AESCipher(key)
-##message=145
-##msg_cryp=encipherer=encipherer.encrypt(message)
+key=str(key)
+#key=key.ljust(32)
+
+
+message="Bonjour les kehs"
+print('Message:',message)
+[ciphertext,iv]=encrypt(key,message)
+print('Encrypted message:',ciphertext)
+decrypted_msg=decrypt(key,iv,ciphertext)
+print('Decrypted message:',decrypted_msg)
+
+
+#####################################################################################################
+
+"""
