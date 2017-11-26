@@ -15,8 +15,10 @@ RELAYS = read_config()
 
 
 
-print("Peer initialized with:",IP, PORT)
+print("Peer initialized with:",IP, PORT,)
+print()
 print("Dictionnary of relays with their IP as a key",RELAYS)
+print()
 
 #Test pour voir si les connections sont bien faites
 for key,item in RELAYS.items():
@@ -25,3 +27,5 @@ for key,item in RELAYS.items():
         print("     Le relais",relay.ip, relay.port,"est connecté aux relais")
         for item,key in relay.neighbors_and_costs.items():
             print("           ",item.ip,item.port,"avec un cout de",key)
+
+    print()
