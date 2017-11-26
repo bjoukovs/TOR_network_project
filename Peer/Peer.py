@@ -1,15 +1,11 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Nov 24 09:49:22 2017
+from peer_config import read_config
 
-@author: Benjamin
-"""
-Class Peer:
-    def_init_(self,ip,port, clef):
-        self.ip = ip
-        self.port = port
-        self.clef = clef
-        self.relay_list = [(,)(,)(,)(,)(,)]
-        
-        def get_relay_list(self):
-            return self.relay_list
+data = read_config()
+
+IP = data[0]
+PORT = data[1]
+
+TOPOLOGY = data[2]
+#The topology will consist of a dictionnary
+#The keys are the IP of the relays
+#The entries are a list of the neighbors of the key
