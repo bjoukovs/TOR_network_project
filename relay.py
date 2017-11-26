@@ -7,7 +7,7 @@ class Relay:
         self._neighbors_costs={}
 
     def connect(self,target_relay,sync,cost=0):
-        
+
         sync=sync+1
         if sync <=1:
             cost=randint(1,9)
@@ -22,3 +22,6 @@ class Relay:
 
     def get_cost(self,neighbor):
         return self._neighbors_costs[neighbor]
+
+    def get_port(self):
+        return self.port
