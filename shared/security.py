@@ -8,6 +8,7 @@
 #
 
 from Crypto.Cipher import AES
+from Crypto.Hash import SHA256
 import hashlib
 from Crypto import Random
 import base64
@@ -48,15 +49,26 @@ def generate_random_nb(bits):
 
 ## code perso pour le cryptage
 def encrypt(key,message):
-    iv=generate_random_nb(128)  #ATTENTION ARBITRARY CHOICE OF 128 BITS FOR IV, IS IT OK?
-    iv=str(iv)
+    # iv=generate_random_nb(128)  #ATTENTION ARBITRARY CHOICE OF 128 BITS FOR IV, IS IT OK?
+    # iv=str(iv)
+    iv = Random.new().read(AES.block_size) #Return a random 16 bytes encoded as utf-8
+    # Hashing of the key to get a 32 bytes key
+    h = SHA256.new()
+    h.update(key.encode('utf-8'))
+    key = h.digest()
     message=pad(message)
-    obj=AES.new(key.encode('utf-8'), AES.MODE_CBC, iv.encode('utf-8'))
+    obj=AES.new(key, AES.MODE_CBC, iv)
+    # obj=AES.new(key.encode('utf-8'), AES.MODE_CBC, iv.encode('utf-8'))
     ciphertext=obj.encrypt(message.encode('utf-8'))
     return [ciphertext,iv]
 
 def decrypt(key,iv,ciphertext):
-    obj2=AES.new(key.encode('utf-8'), AES.MODE_CBC, iv.encode('utf-8'))
+    # Hashing of the key to get a 32 bytes key
+    h = SHA256.new()
+    h.update(key.encode('utf-8'))
+    key = h.digest()
+    obj2=AES.new(key, AES.MODE_CBC, iv)
+    # obj2=AES.new(key.encode('utf-8'), AES.MODE_CBC, iv.encode('utf-8'))
     decrypted_msg=obj2.decrypt(ciphertext)
     decrypted_msg=unpad(decrypted_msg)
     return decrypted_msg
