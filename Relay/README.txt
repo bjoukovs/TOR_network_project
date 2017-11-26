@@ -1,0 +1,1 @@
+To launch different relays, this directory will have to be cloned and the config/host.ini file have to be modified with the computer's IP and a port of choice
