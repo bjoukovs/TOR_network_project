@@ -43,7 +43,8 @@ def read_config():
                     for dest_ip in dests:
 
                         #Cout de connection aléatoire
-                        cost = randint(1,16)
+                        #cost = randint(1,16)
+                        cost = 1
 
                         for relay_source in relays_source:
                             for relay_dest in relays[dest_ip]:

@@ -1,16 +1,24 @@
-Load_list = [] #liste ou chaque elem à 3 composants (matrice (n+2)*3) premier elem:
+from math import inf
+
+def Dijkstra(departure, arrival, network):
+
+    Load_list = {} #liste ou chaque elem à 3 composants (matrice (n+2)*3) premier elem:
                #le n° du noeud; 2eme elm: le poids du noeud; 3eme elem: v/f pour savor si oui ou non on est passé par ce noeud
-Past_list = [] #liste ou chaque elem à 2 composants (matrice (n+2)*2) premier elem: le n° du noeud
+    Past_list = [] #liste ou chaque elem à 2 composants (matrice (n+2)*2) premier elem: le n° du noeud
                 #2eme noeud donne le noeud antérieur: d'ou viens chaque noeud
 
-#Il faut créer la liste des voisin de chaque noeuds
+    #Il faut créer la liste des voisin de chaque noeuds
     Neighbour_list = []#liste (n+1)*(p*x) ou n est le nombre de noeud alice compris mais pas bob...
                        #et p le nmbre de voisin de chaque noeud et x le cout entre les deux relays adjacents
                        #ex: Neighbour_list = [(A,(R1,c1),(R2,c2),(R3,c3)) , (R1,(A,c1),(R4,c4),(R5,c5)) , ...]
                        #Elle doit sortir de l'objet network mais comment?
-Final_path = [] #liste contenant le trajet final de moindre cout
 
-def Dijkstra(departure, arrival, network):
+    nodes = [] #Liste de tous les relais
+    for key, relais in network.items():
+        for relai in relais:
+            relays.append(relai)
+
+    Final_path = [] #liste contenant le trajet final de moindre cout
 
     #je considère le point de départ (Alice) comme un relay à la position 0 et l'arrivée
     #(Bob) comme un relay à la position n+1 donc la liste de relay est de longeur n + 2 avec
@@ -18,32 +26,28 @@ def Dijkstra(departure, arrival, network):
 
     #initization
     #Pour le point de départ
-    Load_list[0][0] = 0 #premier relay
-    Load_list[0][1] = 0 #son cout est forcément nul puisque l'on part de celui-ci
-    Load_list[0][2] = True #on a forcement parcouru le départ: on y est
-    Past_list[0][0] = 0 #premier relay
-    Past_list[0][1] = None #il n'a pas d'atécédent, c'est la source
+    Load_list[departure] = (0, True) #premier relay
+    #Load_list[0][1] = 0 #son cout est forcément nul puisque l'on part de celui-ci
+    #Load_list[0][2] = True #on a forcement parcouru le départ: on y est
+    Past_list[departure] = None #premier relay
+    #Past_list[0][1] = None #il n'a pas d'atécédent, c'est la source
 
     #Pour tout les relays intermédiaires
-    n = get_number_of_nodes
-    for i = 1:1:n:
-        Load_list[i][0] = i
-        Load_list[i]][1] = unknow #mise du poids à infini, unknow valable? sinon chiffre arbitrairement grand 1000
-        Load_list[i]][2] = False  #rien n'a encoe été parcouru: tt à False
-        Past_list[i][0] = i
-        Past_list[i][1] = None #pas encore d'antécéden puisque jamais été parcouru
+    for i, node in enumerate(nodes)
+        Load_list[node] = (inf, False)
+        #Load_list[i+1][1] = unknow #mise du poids à infini, unknow valable? sinon chiffre arbitrairement grand 1000
+        #Load_list[i+1][2] = False  #rien n'a encoe été parcouru: tt à False
+        Past_list[node] = None
+        #Past_list[i+1][0] = node
+        #Past_list[i+1][1] = None #pas encore d'antécéden puisque jamais été parcouru
 
     #Pour l'arrrivée
-    Load_list[n+1][0] = n + 1
-    Load_list[n+1][1] = unknow
-    Load_list[n+1][2] = False
-    Past_list[n+1][0] = n+1
-    Past_list[n+1][1] = None
-
-    Neighbour_list = []#liste (n+1)*(p*x) ou n est le nombre de noeud alice compris mais pas bob...
-                       #et p le nmbre de voisin de chaque noeud et x le cout entre les deux relays adjacents
-                       #ex: Neighbour_list = [(A,(R1,c1),(R2,c2),(R3,c3)) , (R1,(A,c1),(R4,c4),(R5,c5)) , ...]
-                       #
+    Load_list[arrival] = (inf, False)
+    #Load_list[n+1][1] = unknow
+    #Load_list[n+1][2] = False
+    Past_list[arrival] = None
+    #Past_list[n+1][0] = arrival
+    #Past_list[n+1][1] = None
 
 
     #Algorithme de path-finding en lui même
@@ -54,7 +58,7 @@ def Dijkstra(departure, arrival, network):
 
     while (keep_going == True)
         temp_load_list = []
-        for alpha = 1:1:n:
+        for alpha in range(1,length(Load_list)-1):
             temp_load_list[alpha] = Load_list[alpha][1]
 
         if(min(temp_load_list) != Load_list[n+1][1])

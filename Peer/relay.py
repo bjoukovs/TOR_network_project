@@ -7,6 +7,7 @@ class Relay:
         self._ip=ip
         self._port=port
         self.connections_costs={}
+        self.connections_visited={}
 
     def connect(self,target_relay,cost):
 
@@ -15,8 +16,12 @@ class Relay:
             
             #Defini la connexion reciproque avec un cout egal
             self.connections_costs[target_relay] = cost
+            self.connections_visited[target_relay] = False
             target_relay.connect(self,cost)
 
+    @property
+    def neighbours_visited(self):
+        return self.connections_visited
 
     @property
     def neighbors_and_costs(self):
