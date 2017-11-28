@@ -1,16 +1,16 @@
 from security import *
 from Crypto.Cipher import AES
 import math as m
-
-################ Working example ####################################################################
-# obj = AES.new('This is a key123'.encode('utf-8'), AES.MODE_CBC, 'This is an IV456'.encode('utf-8'))
-# message = "The answer is no".encode('utf-8')
-# print('Message:',message)
-# ciphertext = obj.encrypt(message)
-# print('Ciphered message:',ciphertext)
-
-# obj2 = AES.new('This is a key123'.encode('utf-8'), AES.MODE_CBC, 'This is an IV456'.encode('utf-8')) #attention iv must be the same as used for encryption
-# print('Decrypted message:',obj2.decrypt(ciphertext))
+##
+################## Working example ####################################################################
+##obj = AES.new('This is a key123'.encode('utf-8'), AES.MODE_CBC, 'This is an IV456'.encode('utf-8'))
+##message = "The answer is no".encode('utf-8')
+##print('Message:',message)
+##ciphertext = obj.encrypt(message)
+##print('Ciphered message:',ciphertext)
+##
+##obj2 = AES.new('This is a key123'.encode('utf-8'), AES.MODE_CBC, 'This is an IV456'.encode('utf-8')) #attention iv must be the same as used for encryption
+##print('Decrypted message:',obj2.decrypt(ciphertext))
 #####################################################################################################
 
 
@@ -24,6 +24,8 @@ p=generate_prime_nb(1024)
 g=2
 a=generate_random_nb(8)
 b=generate_random_nb(8)
+
+#mettre if a<p-1
 
 #si a et b sont sur + que 16 bits ca prend bcp de temps
 

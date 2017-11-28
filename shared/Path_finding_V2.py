@@ -34,7 +34,7 @@ def Dijkstra(departure, arrival, network):
         Past_list[i][1] = None #pas encore d'antécéden puisque jamais été parcouru
 
     #Pour l'arrrivée
-    Load_list[n+1][0] = 0
+    Load_list[n+1][0] = n + 1
     Load_list[n+1][1] = unknow
     Load_list[n+1][2] = False
     Past_list[n+1][0] = n+1
@@ -47,7 +47,7 @@ def Dijkstra(departure, arrival, network):
 
 
     #Algorithme de path-finding en lui même
-    #on doit faire tourner l'algo tant que le noeud ayant le point le plus faible est pas arrival
+    #on doit faire tourner l'algo tant que le noeud ayant le point le plus faible est pas arrival (bob)
     #il faut continuer à faire tourner sinon ca veut dire que le chemin le plus court n'est pas celui allant à arrival
 
     keep_going = True
