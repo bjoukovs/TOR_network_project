@@ -82,4 +82,4 @@ class Relay(Thread):
             ready = select.select([self._udp_socket], [], [], 1)
             if ready[0]:
                 data, addr = self._udp_socket.recvfrom(1024)
-                self.receive_message(data,addr)
+                self.message_received(data,addr)
