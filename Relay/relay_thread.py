@@ -7,46 +7,50 @@ class Relay(Thread):
     def __init__(self,IP,PORT):
         self._IP = IP
         self._PORT = PORT
-        self._udp_socket = None
+        self._tcp_socket = None
         self._thread_running = False
+        self._active_clients = []
 
-
-    def create_udp_socket(self):
-        print("Initializing UDP socket on",self._IP,self._PORT,'...',end='')
-        self._udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self._udp_socket.bind((self.IP,self.PORT))
-        self._udp_socket.setblocking(0)
+    def create_tcp_socket(self):
+        print("Initializing TCP socket",self.IP,self.PORT,end="...")
+        self._tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._tcp_socket.bind((self.IP, self.PORT))
+        self._tcp_socket.setblocking(0)
         print("OK")
 
-
-    def activate(self):
+    def activate_tcp_socket(self):
+        
+        self._tcp_socket.listen(1)
         print("Start listening...",end='')
-        if self._udp_socket == None:
+        if self._tcp_socket == None:
             print("ERROR : SOCKET NOT INITIALIZED")
         else:
             Thread.__init__(self)
             self._thread_running = True
             self.start()
+
+            #Wait for thread being lauched
             while self.isAlive()==False:
                 pass
             print("OK")
 
-
-    def desactivate(self):
+    def desactivate_tcp_socket(self):
         print("Stop listening...",end="")
         self._thread_running = False
+
+        #Wait for thread being terminated
         while self.isAlive()==True:
             pass
        
         print("OK")
 
 
-    def close_udp_socket(self):
-        print("Closing UDP socket...",end='')
+    def close_tcp_socket(self):
+        print("Closing TCP socket...",end='')
         if self.isAlive()==True:
-            print("ERROR : THREAD STILL LISTENING, DESACTIVATE() FIRST")
+            print("ERROR : THREAD STILL LISTENING, DESACTIVATE_TCP_SOCKET() FIRST")
         else:
-            self._udp_socket.close()
+            self._tcp_socket.close()
             print("OK")
 
 
@@ -67,8 +71,8 @@ class Relay(Thread):
         return self._PORT
 
     @property
-    def udp_socket(self):
-        return self.udp_socket
+    def tcp_socket(self):
+        return self._tcp_socket
     #UDP IPv4 Socket
 
 
@@ -76,10 +80,23 @@ class Relay(Thread):
     def run(self):
         while self._thread_running:
 
-            #Des que le socket a du data disponible, ready[0] devient true et on récupère le message reçu.
+            #Des que le socket a du data disponible, readable contient alors la liste des sockets ayant du data.
             #Cependant, il y a un timeout de 1 seconde, ce qui permet que si aucune donnée n'est arrivée dans la seconde, la boucle recommence.
-            #Sans cette manipulation, il serait impossible de fermer le thread (_thread_running = false) parce que la commande recv_from est une commande bloquante
-            ready = select.select([self._udp_socket], [], [], 1)
-            if ready[0]:
-                data, addr = self._udp_socket.recvfrom(1024)
-                self.message_received(data,addr)
+            #Sans cette manipulation, il serait impossible de fermer le thread (_thread_running = false) parce que la commande accept() est bloquante
+            readable,_,_ = select.select(self._active_clients + [self._tcp_socket] , [], [], 1)
+
+            for s in readable:
+                
+                if s is self._tcp_socket:
+                    client_socket, address = self._tcp_socket.accept()
+                    self._active_clients.append(client_socket)
+                    print("Connection from", address)
+
+                else:
+                    data = s.recv(1024)
+                    print(data)
+                    if data:
+                        s.send(data)
+                    else:
+                        s.close()
+                        self._active_clients.remove(s)
