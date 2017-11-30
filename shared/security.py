@@ -46,12 +46,12 @@ def generate_prime_nb(bits):
 def generate_random_nb(bits):
     return number.getRandomInteger(bits)
 
-
 ## code perso pour le cryptage
 def encrypt(key,message):
     # iv=generate_random_nb(128)  #ATTENTION ARBITRARY CHOICE OF 128 BITS FOR IV, IS IT OK?
     # iv=str(iv)
-    iv = Random.new().read(AES.block_size) #Return a random 16 bytes encoded as utf-8
+    #iv = Random.new().read(AES.block_size) #Return a random 16 bytes encoded as utf-8
+    iv='This is an IV123'.encode('utf-8') #on 16 bytes because 1 caracter=1 byte
     # Hashing of the key to get a 32 bytes key
     h = SHA256.new()
     h.update(key.encode('utf-8'))
@@ -60,10 +60,15 @@ def encrypt(key,message):
     obj=AES.new(key, AES.MODE_CBC, iv)
     # obj=AES.new(key.encode('utf-8'), AES.MODE_CBC, iv.encode('utf-8'))
     ciphertext=obj.encrypt(message.encode('utf-8'))
-    return [ciphertext,iv]
+    print('type_ciphertext:',type(ciphertext))
+    #return [ciphertext,iv]
+    return ciphertext
 
-def decrypt(key,iv,ciphertext):
+def decrypt(key,ciphertext):
+    #ATTENTION si iv fixe alors pas en argument, sinon le rajouter en argument
+
     # Hashing of the key to get a 32 bytes key
+    iv='This is an IV123'.encode('utf-8') #on 16 bytes because 1 caracter=1 byte
     h = SHA256.new()
     h.update(key.encode('utf-8'))
     key = h.digest()
@@ -87,7 +92,7 @@ def unpad(s):
 """ Code de stackoverflow --> bug
 class AESCipher(object):
 
-    def __init__(self, key): 
+    def __init__(self, key):
         self.bs = 32
         self.key = hashlib.sha256(key.encode('utf-8')).digest()
 
