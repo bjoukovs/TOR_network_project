@@ -22,7 +22,7 @@ class Relay(Thread):
         
         self._server_socket.listen(1)
         print("Start listening...",end='')
-        if self._server_socket == None:
+        if self._server_socket is None:
             print("ERROR : SOCKET NOT INITIALIZED")
         else:
             Thread.__init__(self)
@@ -55,12 +55,21 @@ class Relay(Thread):
 
 
 
-    def message_received(self,data,addr):
+    def message_received(self,data,client):
         print()
-        print("Message received from",addr)
+        print("Message received from",client.getpeername())
         print(data)
         print()
+        #TEST
+        #self.send_datagram(data,client)
 
+
+    def send_datagram(self, data, client):
+        client.send(data)
+        print()
+        print("Message sent to",client.getpeername())
+        print(data)
+        print()
 
     @property
     def IP(self):
@@ -91,17 +100,19 @@ class Relay(Thread):
                 if sock is self._server_socket:
                     client_socket, address = self._server_socket.accept()
                     self._active_clients.append(client_socket)
-                    print("Connection from", address)
+                    print("New client connected", address)
 
                 #Sinon il s'agit du socket d'un client connecté qui désire envoyer un message
                 else:
                     data = sock.recv(1024)
-                    print(data)
+                    
+                    #Si data est non vide il s'agit d'un message
                     if data:
-                        sock.send(data)
+                        self.message_received(data,sock)
 
                     #Si data est vide cela veux dire fin de connexion
                     else:
-                        print("client déconnecté")
+                        addr = sock.getpeername()
                         sock.close()
                         self._active_clients.remove(sock)
+                        print("Client disconnected",addr)
