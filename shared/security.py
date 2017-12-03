@@ -52,16 +52,23 @@ def encrypt(key,message):
     # iv=str(iv)
     #iv = Random.new().read(AES.block_size) #Return a random 16 bytes encoded as utf-8
     iv='This is an IV123'.encode('utf-8') #on 16 bytes because 1 caracter=1 byte
+
     # Hashing of the key to get a 32 bytes key
     h = SHA256.new()
     h.update(key.encode('utf-8'))
     key = h.digest()
-    message=pad(message)
+
     obj=AES.new(key, AES.MODE_CBC, iv)
+    message=pad(message)
+    #print(message)
     # obj=AES.new(key.encode('utf-8'), AES.MODE_CBC, iv.encode('utf-8'))
-    ciphertext=obj.encrypt(message.encode('utf-8'))
-    print('type_ciphertext:',type(ciphertext))
+    if isinstance(message,str):
+        ciphertext=obj.encrypt(message.encode('utf-8'))
+    elif isinstance(message,bytes):
+        ciphertext = obj.encrypt(message)
+    #print('type_ciphertext:',type(ciphertext))
     #return [ciphertext,iv]
+    #print(len(ciphertext))
     return ciphertext
 
 def decrypt(key,ciphertext):
@@ -72,16 +79,25 @@ def decrypt(key,ciphertext):
     h = SHA256.new()
     h.update(key.encode('utf-8'))
     key = h.digest()
+    #print(len(ciphertext))
     obj2=AES.new(key, AES.MODE_CBC, iv)
     # obj2=AES.new(key.encode('utf-8'), AES.MODE_CBC, iv.encode('utf-8'))
     decrypted_msg=obj2.decrypt(ciphertext)
     decrypted_msg=unpad(decrypted_msg)
+    #print('type_decrypted_msg:',type(decrypted_msg))
     return decrypted_msg
 
 def pad(s):
-    bs=32
-    return s + (bs - len(s) % bs) * chr(bs - len(s) % bs)
+    if isinstance(s,str):
+        bs=32
+        padded = s + (bs - len(s) % bs) * chr(bs - len(s) % bs)
+    elif isinstance(s,bytes):
+        bs=32
+        #padded = s + bytes(16 - len(s)%16)
+        padded = s + (bs - len(s) % bs) * bytes([bs - len(s) % bs])
+    return padded
 def unpad(s):
+    #print(ord(s[len(s)-1:]))
     return s[:-ord(s[len(s)-1:])]
 ##
 
