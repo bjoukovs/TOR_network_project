@@ -1,5 +1,5 @@
 from peer_config import read_config
-from relay import Relay
+from relay_object import Relay
 
 import os,sys,inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))

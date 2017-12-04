@@ -1,5 +1,10 @@
 #This file will contain the code to read the topology config file
-from relay import Relay
+import os,sys,inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0,parentdir) 
+
+from shared.config.relay_object import Relay
 from random import randint
 
 config_url = "config/topology.ini"

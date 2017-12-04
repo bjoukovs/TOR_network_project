@@ -11,14 +11,14 @@ class Relay(Thread):
         self._thread_running = False
         self._active_clients = []
 
-    def create_tcp_socket(self):
+    def create_server_socket(self):
         print("Initializing TCP socket",self.IP,self.PORT,end="...")
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._server_socket.bind((self.IP, self.PORT))
         self._server_socket.setblocking(0)
         print("OK")
 
-    def activate_tcp_socket(self):
+    def activate_server_socket(self):
         
         self._server_socket.listen(1)
         print("Start listening...",end='')
@@ -34,7 +34,7 @@ class Relay(Thread):
                 pass
             print("OK")
 
-    def desactivate_tcp_socket(self):
+    def desactivate_server_socket(self):
         print("Stop listening...",end="")
         self._thread_running = False
 
@@ -45,7 +45,7 @@ class Relay(Thread):
         print("OK")
 
 
-    def close_tcp_socket(self):
+    def close_server_socket(self):
         print("Closing TCP socket...",end='')
         if self.isAlive()==True:
             print("ERROR : THREAD STILL LISTENING, DESACTIVATE_server_socket() FIRST")

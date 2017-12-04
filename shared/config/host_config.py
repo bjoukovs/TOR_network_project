@@ -7,12 +7,15 @@ def read_config():
     host_config = host_file.read().splitlines()
     host_file.close()
 
+    ip = "0.0.0.0"
+    port = 0
+
     for line in host_config:
         if len(line)>0:
             if line[0]!="#" and line[0]!="[" and line[0]!=" ":
                 elems = line.split(" ")
 
-                IP = elems[0]
-                PORT = int(elems[1])
+                ip = elems[0]
+                port = int(elems[1])
     
-    return [IP, PORT]
+    return [ip, port]
