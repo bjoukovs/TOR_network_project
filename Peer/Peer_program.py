@@ -29,11 +29,14 @@ def close_peer():
 
 atexit.register(close_peer)
 
-def onPress(key):
-    if key == Key.esc:
-        print("CLOSE REQUEST BY USER")
-        close_peer()
+#####
+#ECRIRE LE CODE A TESTER ICI
 
-with Listener(on_press = onPress) as listener:
-    print("PRESS ESC TO EXIT")
-    listener.join()
+
+
+
+
+
+#####
+
+close_peer()
