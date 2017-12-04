@@ -30,7 +30,7 @@ ls_keys_copy=deepcopy(ls_keys)
 
 message='Bonjour les zamis'
 message_final=build_shallot(ls_hops,ls_keys,message)
-#print('Message final:',message_final)
+print('Message final:',message_final)
 
 ####### Decoding the shallot #######
 
@@ -50,6 +50,7 @@ for i in range(0,3):
     #print('\nIP received:',next_hop_received[0],'Port received:',next_hop_received[1])
     print('IP received:',next_hop_received)
     #print(len(decrypted))
+    print(decrypted)
     if i == 2:
         message_final = decrypted[4:]
     else:

@@ -1,4 +1,4 @@
-from bitarray import bitarray
+#from bitarray import bitarray
 
 class Message:
     def __init__(self,version,type_):
@@ -21,12 +21,12 @@ class Message:
         byte_message = Message.int_bytes(int(bin(self.version)[2:]+bin(self.type_)[2:],2),1) + bytes(1)
         return byte_message
 
-    @staticmethod
-    def bits_repr(bytes_form):
-        '''Return the bit representation of the given bytes in a string. '''
-        temp = bitarray()
-        temp.frombytes(bytes_form)
-        return temp.to01()
+    # @staticmethod
+    # def bits_repr(bytes_form):
+    #     '''Return the bit representation of the given bytes in a string. '''
+    #     temp = bitarray()
+    #     temp.frombytes(bytes_form)
+    #     return temp.to01()
 
 
 #class KEY_INIT(Message):
