@@ -1,6 +1,8 @@
 import socket
 import select
 from threading import Thread
+from Message import *
+from security import *
 
 class Relay(Thread):
 
@@ -10,6 +12,7 @@ class Relay(Thread):
         self._server_socket = None
         self._thread_running = False
         self._active_clients = []
+        self.dict_keys = {} # Dict with key_id = DH Key
 
     def create_server_socket(self):
         print("Initializing TCP socket",self.IP,self.PORT,end="...")
@@ -56,10 +59,45 @@ class Relay(Thread):
 
 
     def message_received(self,data,client):
-        print()
-        print("Message received from",client.getpeername())
-        print(data)
-        print()
+        # data is the header of the message
+        length = (Message.bytes_int(data[2:4]) - 1)*4 # Nb of bytes to read next
+        payload = sock.recv(length)
+        msg_type = Message.bytes_int(data[0]) - 16 # to extract type from version (=1) + type of the header
+        if msg_type == 0: #KEY_INIT
+            key_init = KEY_INIT.init_from_msg(payload)
+            b = generate_random_nb(8)
+            key = DH_shared_secret(key_init.A,b,key_init.p)
+            self.dict_keys[key_init.key_id] = key
+
+            #Send Key reply
+            B = DH_exchange(key_init.g,b,key_init.p)
+            key_reply = KEY_REPLY(key_init.key_id,B)
+            msg_to_send = key_reply.byte_form()
+            self.send_datagram(msg_to_send,client)
+        elif msg_type == 2: #MESSAGE_RELAY
+            key_id_received, ciphered = MESSAGE_RELAY.get_key_id_and_ciphtext(payload)
+            try:
+                key = dict_keys[key_id_received]
+            except Exception, e:
+                error_msg = ERROR(1)
+                self.send_datagram(error_msg,client)
+            decrypted = decrypt(,ciphered)
+            next_hop_ip_received, next_hop_port_received = MESSAGE_RELAY.get_next_hop(decrypted)
+            print('IP received:',next_hop_ip_received, 'Port received:',next_hop_port_received)
+            msg_to_send = MESSAGE_RELAY.get_payload_to_send(decrypted)
+            IP = next_hop_ip_received
+            PORT = next_hop_port_received #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ASK FOR PORT
+            sock = socket.socket(socket.AF_INET, # Internet
+                                  socket.SOCK_STREAM) # TCP
+            sock.connect((IP,PORT))
+            sock.sendall(msg_to_send)
+            sock.close()
+        elif msg_type == 3:
+            
+        # print()
+        # print("Message received from",client.getpeername())
+        # print(data)
+        # print()
         #TEST
         #self.send_datagram(data,client)
 
@@ -104,7 +142,7 @@ class Relay(Thread):
 
                 #Sinon il s'agit du socket d'un client connecté qui désire envoyer un message
                 else:
-                    data = sock.recv(1024)
+                    data = sock.recv(4) # Bytes ?
                     
                     #Si data est non vide il s'agit d'un message
                     if data:

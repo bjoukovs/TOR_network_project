@@ -138,7 +138,7 @@ class MESSAGE_RELAY(Message):
 
     def to_cipher(self):
         '''Return the part of the message to cipher in his byte form with all the relevant attributes concatenated. '''
-        to_cipher = bytes([int(elem) for elem in self.nexthop_ip.split('.')])
+        to_cipher = bytes([int(elem) for elem in self.nexthop_ip.split('.')]) + Message.int_bytes(self.nexthop_port,4)
         if isinstance(self.payload,str):
             to_cipher += self.payload.encode('utf-8')
         elif isinstance(self.payload,bytes):
@@ -159,7 +159,12 @@ class MESSAGE_RELAY(Message):
     @staticmethod
     def get_next_hop(decrypted_msg):
         '''Return the next hop IP address of the provided message. '''
-        return '.'.join([str(elem) for elem in list(decrypted_msg[:4])])
+        return '.'.join([str(elem) for elem in list(decrypted_msg[:4])]), Message.bytes_int(msg[4:8])
+
+    @staticmethod
+    def get_payload_to_send(decrypted_msg):
+        '''Return the next hop IP address of the provided message. '''
+        return decrypted_msg[8:]
 
 class ERROR(Message):
     def __init__(self,error_code):

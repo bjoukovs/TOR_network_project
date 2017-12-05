@@ -45,10 +45,10 @@ for i in range(0,3):
     #ciphered = message_final[12+len(bin(ls_keys_copy[i][0]))-2:]
     #print(type(ciphered))
     decrypted = decrypt(ls_keys_copy[i][1],ciphered)
-    #next_hop_received = (decrypted[:16],decrypted[16:32])
-    next_hop_received = MESSAGE_RELAY.get_next_hop(decrypted)
-    #print('\nIP received:',next_hop_received[0],'Port received:',next_hop_received[1])
-    print('IP received:',next_hop_received)
+    #next_hop_ip_received = (decrypted[:16],decrypted[16:32])
+    next_hop_ip_received,next_hop_port_received = MESSAGE_RELAY.get_next_hop(decrypted)
+    #print('\nIP received:',next_hop_ip_received[0],'Port received:',next_hop_ip_received[1])
+    print('IP received:',next_hop_ip_received, 'Port received:',next_hop_port_received)
     #print(len(decrypted))
     print(decrypted)
     if i == 2:
