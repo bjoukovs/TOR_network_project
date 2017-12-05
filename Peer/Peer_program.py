@@ -1,4 +1,6 @@
 from pynput.keyboard import Key, Listener
+from tkinter import Tk
+from peer_gui import Peer_gui
 import atexit
 
 import os,sys,inspect
@@ -32,10 +34,11 @@ atexit.register(close_peer)
 #####
 #ECRIRE LE CODE A TESTER ICI
 
-
-
-
-
+#Interface graphique
+GUI = Tk()
+GUI.geometry("300x280+300+300")
+app = Peer_gui()
+GUI.mainloop() 
 
 #####
 

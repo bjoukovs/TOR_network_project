@@ -1,8 +1,14 @@
 import socket
 import select
 from threading import Thread
-from Message import *
-from security import *
+
+import os,sys,inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0,parentdir) 
+
+from shared.Message import *
+from shared.security import *
 
 class Relay(Thread):
 
@@ -78,10 +84,10 @@ class Relay(Thread):
             key_id_received, ciphered = MESSAGE_RELAY.get_key_id_and_ciphtext(payload)
             try:
                 key = dict_keys[key_id_received]
-            except Exception, e:
+            except Exception(e):
                 error_msg = ERROR(1)
                 self.send_datagram(error_msg,client)
-            decrypted = decrypt(,ciphered)
+            decrypted = decrypt(key,ciphered)
             next_hop_ip_received, next_hop_port_received = MESSAGE_RELAY.get_next_hop(decrypted)
             print('IP received:',next_hop_ip_received, 'Port received:',next_hop_port_received)
             msg_to_send = MESSAGE_RELAY.get_payload_to_send(decrypted)
@@ -93,6 +99,7 @@ class Relay(Thread):
             sock.sendall(msg_to_send)
             sock.close()
         elif msg_type == 3:
+            pass
             
         # print()
         # print("Message received from",client.getpeername())
