@@ -107,6 +107,7 @@ class Relay(Thread):
         # print()
         #TEST
         #self.send_datagram(data,client)
+        return(decrypted)
 
 
     def send_datagram(self, data, client):

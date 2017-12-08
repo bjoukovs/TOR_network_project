@@ -1,6 +1,7 @@
 from pynput.keyboard import Key, Listener
 from tkinter import Tk
 from peer_gui import Peer_gui
+from Peer_relay import Peer
 import atexit
 
 import os,sys,inspect
@@ -18,15 +19,15 @@ host_data = read_config_host()
 IP = host_data[0]    #String
 PORT = host_data[1]  #Integer
 TOPOLOGY = read_config_peer()
-RELAY = Relay(IP,PORT)
+PEER = Peer(IP,PORT,TOPOLOGY) #Objet peer héritant de la classe Relay
 
 #Initialisation du relais interne du peer
-#RELAY.create_server_socket()
-#RELAY.activate_server_socket()
+PEER.create_server_socket()
+PEER.activate_server_socket()
 
 def close_peer():
-    RELAY.desactivate_server_socket()
-    RELAY.close_server_socket()
+    PEER.desactivate_server_socket()
+    PEER.close_server_socket()
     exit()
 
 atexit.register(close_peer)
@@ -37,7 +38,7 @@ atexit.register(close_peer)
 #Interface graphique
 GUI = Tk()
 GUI.geometry("400x300+300+300")
-app = Peer_gui(RELAY)
+app = Peer_gui(PEER)
 GUI.mainloop() 
 
 #####
