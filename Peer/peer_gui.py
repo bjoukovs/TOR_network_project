@@ -13,10 +13,12 @@ class Peer_gui(Frame):
         self.pack(fill=BOTH, expand=1)
 
         message_frame = Frame(self)
-        input_frame = Frame(self)
+        input_frame = Frame(self,relief="groove")
+        dest_frame = Frame(self)
 
         message_frame.pack(side=TOP,fill=BOTH,expand=True)
-        input_frame.pack(side=BOTTOM,fill=BOTH)
+        dest_frame.pack(side=BOTTOM,fill=BOTH)
+        input_frame.pack(fill=BOTH)
         #message_frame.pack_propagate(0)
 
         #self.style = Style()
@@ -27,6 +29,12 @@ class Peer_gui(Frame):
 
         send_button = Button(input_frame, text="SEND")
         send_button.pack(side=RIGHT, padx=5, pady=5)
+
+        lab = Label(dest_frame,text="Destination IP:PORT")
+        lab.pack(side=LEFT,fill=X,padx=5,pady=5)
+
+        dest_input = Entry(dest_frame)
+        dest_input.pack(side=RIGHT,padx=5,pady=5,expand=True,fill=X)
 
         output_text= Label(message_frame, text="Welcome to Shallot Messenger",relief="solid",justify=LEFT,anchor=N+W,background="white")
         output_text.pack(fill=BOTH,padx=5,pady=5,expand=True)
