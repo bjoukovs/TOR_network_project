@@ -21,8 +21,8 @@ TOPOLOGY = read_config_peer()
 RELAY = Relay(IP,PORT)
 
 #Initialisation du relais interne du peer
-RELAY.create_server_socket()
-RELAY.activate_server_socket()
+#RELAY.create_server_socket()
+#RELAY.activate_server_socket()
 
 def close_peer():
     RELAY.desactivate_server_socket()
@@ -36,8 +36,8 @@ atexit.register(close_peer)
 
 #Interface graphique
 GUI = Tk()
-GUI.geometry("300x280+300+300")
-app = Peer_gui()
+GUI.geometry("400x300+300+300")
+app = Peer_gui(RELAY)
 GUI.mainloop() 
 
 #####
