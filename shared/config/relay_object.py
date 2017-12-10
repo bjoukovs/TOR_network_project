@@ -40,3 +40,13 @@ class Relay:
 
     def get_port(self):
         return self.port
+
+    def select_relay(relays,ip,port):
+        selected = None
+        relays_at_ip = relays.get(ip,None)
+        if relays_at_ip is not None:
+            for r in relays_at_ip:
+                if int(r.port) == port:
+                    selected = r
+
+        return selected

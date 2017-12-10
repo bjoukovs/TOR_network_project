@@ -9,9 +9,10 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir) 
 
-from shared.Relay import Relay
+from shared.Relay import Relay as Relay
 from shared.config.peer_config import read_config as read_config_peer
 from shared.config.host_config import read_config as read_config_host
+from shared.config.relay_object import Relay as Relay_object
 
 host_data = read_config_host()
 
