@@ -5,7 +5,7 @@ from random import randint
 class Relay:
     def __init__(self,ip,port):
         self._ip=ip
-        self._port=port
+        self._port=int(port)
         self.connections_costs={}
         self.connections_visited={}
 

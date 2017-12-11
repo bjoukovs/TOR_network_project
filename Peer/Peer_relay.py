@@ -10,7 +10,7 @@ from shared.Message import MESSAGE_RELAY, KEY_INIT, Message
 from shared.security import DH_exchange
 from shared.shallot import *
 from random import *
-
+import socket
 
 class Peer(Relay):
 
@@ -93,7 +93,7 @@ class Peer(Relay):
 
             self.key_buffer = None
             #Blocked until key_buffer is not None
-            B = negociate_key_with_relay(hops[i],message)
+            B = self.negociate_key_with_relay(hops[i],message)
 
             key = DH_shared_secret(B,a,p)
             key=str(key)
@@ -108,7 +108,9 @@ class Peer(Relay):
     def negociate_key_with_relay(self,relay,message):
         sock = socket.socket(socket.AF_INET, # Internet
                                 socket.SOCK_STREAM) # TCP
-        sock.connect((relay.IP,relay.PORT))
+        
+        print(type(relay.ip), type(relay.port))
+        sock.connect((relay.ip,relay.port))
         sock.sendall(message)
 
         #Wait for key reply response
