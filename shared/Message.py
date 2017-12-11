@@ -46,7 +46,7 @@ class KEY_INIT(Message):
     def __init__(self,key_id,g,p,A):
         '''Arguments: [int] key_id, [int] g, [int] p, [int] A. '''
         Message.__init__(self,1,0)
-        self.msg_length=67
+        self.msg_length=67 #dword
         self.key_id=key_id
         self.g=g
         self.p=p

@@ -84,17 +84,21 @@ class Relay(Thread):
         sock.sendall(msg_to_send)
         sock.close()
 
-    def open_message(self,data):
+    def open_message(self,data,client):
         # data is the header of the message
         length = (Message.bytes_int(data[2:4]) - 1)*4 # Nb of bytes to read next
-        payload = sock.recv(length)
-        msg_type = Message.bytes_int(data[0]) - 16 # to extract type from version (=1) + type of the header
+        payload = client.recv(length)
+        msg_type = data[0] - 16 # to extract type from version (=1) + type of the header
+                                #data[0] est deja un int
 
         return payload, msg_type
 
-    def message_received(self,data,client):
+    def message_received(self,data,client,from_super=False,payload=None,msg_type=None):
+        
+        decrypted = None
 
-        payload, msg_type = self.open_message(data)
+        if from_super==False:
+            payload, msg_type = self.open_message(data,client)
 
         if msg_type == 0: #KEY_INIT
             key_init = KEY_INIT.init_from_msg(payload)
@@ -159,6 +163,7 @@ class Relay(Thread):
                 #Si le socket qui a reçu un message est _server_socket alors il s'agit d'une demande de connexion
                 if sock is self._server_socket:
                     client_socket, address = self._server_socket.accept()
+                    client_socket.setblocking(0)
                     self._active_clients.append(client_socket)
                     print("New client connected", address)
 

@@ -65,7 +65,7 @@ class Peer(Relay):
 
     def message_received(self,data,client):
         
-        payload, msg_type = self.open_message(data)
+        payload, msg_type = self.open_message(data,client)
 
         #Message Key_reply
         if msg_type==1:
@@ -73,8 +73,10 @@ class Peer(Relay):
             self.key_buffer = key_reply.B
 
         else:
-            decrypted = super().message_received(data,client)
-            self.linked_gui.receive_message(decrypted)
+            decrypted = super().message_received(data,client,True,payload,msg_type)
+
+            if decrypted is not None:
+                self.linked_gui.receive_message(decrypted)
 
 
     def negociate_keys(self,hops):
@@ -109,7 +111,7 @@ class Peer(Relay):
         sock = socket.socket(socket.AF_INET, # Internet
                                 socket.SOCK_STREAM) # TCP
         
-        print(type(relay.ip), type(relay.port))
+        print(relay.ip, relay.port)
         sock.connect((relay.ip,relay.port))
         sock.sendall(message)
 
