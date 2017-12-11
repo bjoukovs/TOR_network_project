@@ -57,7 +57,7 @@ class Peer(Relay):
         next_hop_ip_received, next_hop_port_received = MESSAGE_RELAY.get_next_hop(decrypted)
         
         #If IP and PORT correspond to the Peer's address, then the message is arrived at destination
-        if next_hop_ip_received = self.IP and next_hop_port_received = self.PORT:
+        if next_hop_ip_received == self.IP and next_hop_port_received == self.PORT:
             print("MESSAGE ARRIVED AT DESTINATION")
         else:
             super().send_to_next_hop(decrypted)
@@ -81,7 +81,7 @@ class Peer(Relay):
         ls_keys=[]
 
         #hops[0] is Alice
-        for i in range(1:len(hops)-1):
+        for i in range(1,len(hops)):
             p=generate_prime_nb(1024)
             g=2
             a=generate_random_nb(8)
