@@ -110,8 +110,8 @@ class KEY_REPLY(Message):
 #        Message.__init__(self,version,type_)
 #        self.seq_nb=seq_nb
 #        self.key_id=key_id
-#        self.nexthop_ip=nexthop[0]
-#        self.nexthop_port=nexthop[1]
+#        self.nexthop_ip=nexthop.ip
+#        self.nexthop_port=nexthop.port
 #        self.payload=payload
 #        #self.padding=padding #le padding va etre fait dans la fct concatene et n'est plus un attribut
 #    def part_non_cipher(self):
@@ -130,10 +130,10 @@ class MESSAGE_RELAY(Message):
     def __init__(self,seq_nb,key_id,nexthop,payload):
         '''Arguments: [int] seq_nb, [int] key_id, [Tuple (IP,port)] nexthop ([String] IP, [int] port), [String||Bytes] payload. '''
         Message.__init__(self,1,2)
-        self.seq_nb=seq_nb
+        self.seq_nb = 2 + ceil(length(self.to_cipher()))/4
         self.key_id=key_id
-        self.nexthop_ip=nexthop[0]
-        self.nexthop_port=nexthop[1] #Currently not used since IP Address is 32 bits so no place for port!!!!!
+        self.nexthop_ip=nexthop.ip
+        self.nexthop_port=nexthop.port #Currently not used since IP Address is 32 bits so no place for port!!!!!
         self.payload=payload
 
     def to_cipher(self):

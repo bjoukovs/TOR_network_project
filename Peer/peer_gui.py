@@ -61,7 +61,7 @@ class Peer_gui(Frame):
         #Envoyer un message à Bob
         self.linked_peer.send_message(message,ip,port)
 
-    def receive_message(self,message,ip,port):
+    def receive_message(self,message,ip='0.0.0.0',port=0000):
         #Reçoit un message depuis le relais
 
         self.print_message(str(ip)+":"+str(port)+" -> you",0)

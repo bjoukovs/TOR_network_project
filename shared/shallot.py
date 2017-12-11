@@ -1,5 +1,7 @@
 from security import *
 from Message import *
+from copy import deepcopy
+
 def negociate_key(sender,receiver):
     g=2 #A METTRE SUR 32 BITS!
     #A= ...
@@ -35,15 +37,27 @@ def negociate_key(sender,receiver):
 #    elif len(ls_hops)==0: #quand ca arrive chez Alice
 #        return message
 
+def build_list_for_shallot(ls_hops,ls_keys):
+    hops = deepcopy(ls_hops)
+    keys = deepcopy(ls_keys)
+
+    hops.append(ls_hops[-1])
+    hops.reverse()
+    keys.reverse()
+
+    return hops, keys
+    
+
+
 def build_shallot(ls_hops,ls_keys,message,sync=0):
 #ATTENTION ls_hops and ls_keys have to be in direct order because we invert them 1 time
 #ls_keys est un tuple (key_id,key)
-#ls_hops= list of tuples (IP,port)
+#ls_hops= list of Relay_object
 #ls_hops contains the direct path, but to build the shallot we need to reverse it
     if sync==0:
-        ls_hops.reverse()
-        ls_keys.reverse()
-    if len(ls_hops)>0: #EN CONSIDERANT QUE ALICE N'EST PAS DANS ls_hops
+        ls_hops, ls_keys = build_list_for_shallot(ls_hops,ls_keys)
+
+    if len(ls_hops)>0:
         seq_nb=1 #A MODIFIER, QU EST CE QUE CA REPRESENTE
         key_id=ls_keys[0][0]
         next_hop=ls_hops[0]
@@ -57,10 +71,10 @@ def build_shallot(ls_hops,ls_keys,message,sync=0):
 
         ls_hops.remove(ls_hops[0])
         ls_keys.remove(ls_keys[0])
-        sync=1;
+        sync=1
         #print('iteration')
         #print('Total message:',total_message)
         return build_shallot(ls_hops,ls_keys,total_message,sync)
 
-    elif len(ls_hops)==0: #quand ca arrive chez Alice
+    elif len(ls_keys)==0: #quand ca arrive chez Alice
         return message
