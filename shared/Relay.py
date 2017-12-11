@@ -29,6 +29,10 @@ class Relay(Thread):
     def PORT(self):
         return self._PORT
 
+    @property
+    def active_clients(self):
+        return self._active_clients
+
     def create_server_socket(self):
         print("Initializing TCP socket",self.IP,self.PORT,end="...")
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -88,36 +92,49 @@ class Relay(Thread):
         # data is the header of the message
         length = (Message.bytes_int(data[2:4]) - 1)*4 # Nb of bytes to read next
         payload = client.recv(length)
-        msg_type = data[0] - 16 # to extract type from version (=1) + type of the header
+        print(data[0])
+        print(bin(data[0]))
+        msg_type = data[0]-16 # to extract type from version (=1) + type of the header
                                 #data[0] est deja un int
 
+        print("Message type", msg_type)
         return payload, msg_type
 
     def message_received(self,data,client,from_super=False,payload=None,msg_type=None):
         
         decrypted = None
 
+        print("message received")
+
         if from_super==False:
             payload, msg_type = self.open_message(data,client)
+
+        print(msg_type)
 
         if msg_type == 0: #KEY_INIT
             key_init = KEY_INIT.init_from_msg(payload)
             b = generate_random_nb(8)
             key = DH_shared_secret(key_init.A,b,key_init.p)
-            self.dict_keys[key_init.key_id] = key
+            self.dict_keys[key_init.key_id] = str(key)
+
+            print("Key received")
 
             #Send Key reply
             B = DH_exchange(key_init.g,b,key_init.p)
             key_reply = KEY_REPLY(key_init.key_id,B)
             msg_to_send = key_reply.byte_form()
             self.send_datagram(msg_to_send,client)
+
+            print("Reply sent")
        
 
         elif msg_type == 2: #MESSAGE_RELAY
             key_id_received, ciphered = MESSAGE_RELAY.get_key_id_and_ciphtext(payload)
+            print(key_id_received)
+            print(self.dict_keys)
             try:
-                key = dict_keys[key_id_received]
-            except Exception(e):
+                key = self.dict_keys[key_id_received]
+            except Exception:
                 error_msg = ERROR(1)
                 self.send_datagram(error_msg,client)
             decrypted = decrypt(key,ciphered)
@@ -129,7 +146,7 @@ class Relay(Thread):
 
 
     def send_datagram(self, data, client):
-        client.send(data)
+        client.sendall(data)
         print()
         print("Message sent to",client.getpeername())
         print(data)
@@ -170,6 +187,7 @@ class Relay(Thread):
                 #Sinon il s'agit du socket d'un client connecté qui désire envoyer un message
                 else:
                     data = sock.recv(4) # Bytes ?
+                    print(data)
                     
                     #Si data est non vide il s'agit d'un message
                     if data:

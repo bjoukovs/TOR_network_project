@@ -11,6 +11,7 @@ from shared.security import DH_exchange
 from shared.shallot import *
 from random import *
 import socket
+import time
 
 class Peer(Relay):
 
@@ -39,18 +40,28 @@ class Peer(Relay):
         else:
             #Attention hops contient aussi Alice
             hops = Dijkstra(self.relay_object,dest_relay,self.network_topology)
-            ls_keys = self.negociate_keys(hops)
-            message_to_send = build_shallot(hops,ls_keys,message)
-            
-            sock = socket.socket(socket.AF_INET, # Internet
-                                socket.SOCK_STREAM) # TCP
-            sock.connect((hops[1].IP,hops[1].PORT))
-            sock.sendall(message)
-            sock.close()
-
+            self.buffered_message = (message,hops)
+            self.negociate_keys(hops)
 
         #METTRE LE CODE PERMETTANT D'ENVOYER UN MESSAGE A BOB + LA NEGOCIATION DES CLES
         #UTILIER LA COMMANDE self.send_datagram() pour enoyer des paquets à des clients connectés
+
+    def when_keys_negociated(self):
+        
+        message,hops = self.buffered_message
+        keys_ordered = [(k,val) for k,val in self.keys.items()]
+        keys_ordered.sort(key=lambda x: x[1][4])
+        keys_ordered = [(x[0],x[1][3]) for x in keys_ordered]
+        print(keys_ordered)
+
+
+        message_to_send = build_shallot(hops,keys_ordered,message)
+            
+        sock = socket.socket(socket.AF_INET, # Internet
+                                socket.SOCK_STREAM) # TCP
+        sock.connect((hops[1].ip,hops[1].port))
+        sock.sendall(message_to_send)
+        sock.close()
 
     def send_to_next_hop(self,decrypted):
         print('Overrided')
@@ -69,18 +80,49 @@ class Peer(Relay):
 
         #Message Key_reply
         if msg_type==1:
+
             key_reply = KEY_REPLY.init_from_msg(payload)
-            self.key_buffer = key_reply.B
+            key_id = key_reply.key_id
+            print("Key reply received")
+
+            B = key_reply.B
+            self.keys[key_id][2] = B
+
+            key = DH_shared_secret(self.keys[key_id][2],self.keys[key_id][0],self.keys[key_id][1])#B,a,p
+            key=str(key)
+            print(key)
+            #key_id=generate_random_nb(32) #Does not generate exactly 32 bits every time
+            #print(len(bin(key_id)))
+            self.keys[key_id][3] = key
+
+            client.close()
+            self.active_clients.remove(client)
+            print("connection closed")
+
+            all_negociated = True
+            for k,val in self.keys.items():
+                if val[3] is None:
+                    all_negociated = False
+                    break
+            print(all_negociated)
+
+            if all_negociated:
+                print("all keys negociated")
+                self.when_keys_negociated()
+
 
         else:
             decrypted = super().message_received(data,client,True,payload,msg_type)
 
             if decrypted is not None:
-                self.linked_gui.receive_message(decrypted)
+                final_message = decrypted[8:]
+                print(final_message)
+                self.linked_gui.receive_message(final_message.decode('utf-8'))
 
 
     def negociate_keys(self,hops):
         ls_keys=[]
+        self.keys = {}
 
         #hops[0] is Alice
         for i in range(1,len(hops)):
@@ -93,32 +135,24 @@ class Peer(Relay):
             key_init = KEY_INIT(key_id,g,p,A)
             message = key_init.byte_form()
 
-            self.key_buffer = None
-            #Blocked until key_buffer is not None
-            B = self.negociate_key_with_relay(hops[i],message)
+            self.keys[key_id] = [a,p,None,None,i]
 
-            key = DH_shared_secret(B,a,p)
-            key=str(key)
-            #key_id=generate_random_nb(32) #Does not generate exactly 32 bits every time
-            #print(len(bin(key_id)))
-            temp=(key_id,key)
-            ls_keys.append(temp)
+            self.negociate_key_with_relay(hops[i],message)
 
-        return ls_keys
+        #return ls_keys
 
 
     def negociate_key_with_relay(self,relay,message):
         sock = socket.socket(socket.AF_INET, # Internet
                                 socket.SOCK_STREAM) # TCP
+    
+        self.active_clients.append(sock)
         
         print(relay.ip, relay.port)
         sock.connect((relay.ip,relay.port))
         sock.sendall(message)
 
         #Wait for key reply response
-        while self.key_buffer is None:
-            pass
+        print("Waiting for key reply")
 
-        sock.close()
-        return self.key_buffer
 

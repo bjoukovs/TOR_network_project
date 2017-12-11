@@ -1,4 +1,12 @@
 #from bitarray import bitarray
+from math import ceil
+
+import os,sys,inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0,parentdir) 
+
+from shared.config.relay_object import Relay as Relay_object
 
 class Message:
     def __init__(self,version,type_):
@@ -18,7 +26,7 @@ class Message:
 
     def byte_form(self):
         '''Return the message in his byte form with all the attributes concatenated. '''
-        byte_message = Message.int_bytes(int(bin(self.version)[2:]+bin(self.type_)[2:],2),1) + bytes(1)
+        byte_message = Message.int_bytes(self.version*16+self.type_,1) + bytes(1)
         return byte_message
 
     # @staticmethod
@@ -129,12 +137,19 @@ class KEY_REPLY(Message):
 class MESSAGE_RELAY(Message):
     def __init__(self,seq_nb,key_id,nexthop,payload):
         '''Arguments: [int] seq_nb, [int] key_id, [Tuple (IP,port)] nexthop ([String] IP, [int] port), [String||Bytes] payload. '''
-        Message.__init__(self,1,2)
-        self.seq_nb = 2 + ceil(length(self.to_cipher()))/4
+        super().__init__(1,2)
         self.key_id=key_id
         self.nexthop_ip=nexthop.ip
         self.nexthop_port=nexthop.port #Currently not used since IP Address is 32 bits so no place for port!!!!!
         self.payload=payload
+        self.seq_nb = 0 #2 + ceil(len(self.to_cipher())/4)
+
+    def update_length(self,payload):
+        self.payload = payload
+        length = int(2 + len(self.payload)/4)
+        print(len(payload))
+        print(length)
+        self.seq_nb = length
 
     def to_cipher(self):
         '''Return the part of the message to cipher in his byte form with all the relevant attributes concatenated. '''
@@ -159,7 +174,7 @@ class MESSAGE_RELAY(Message):
     @staticmethod
     def get_next_hop(decrypted_msg):
         '''Return the next hop IP address of the provided message. '''
-        return '.'.join([str(elem) for elem in list(decrypted_msg[:4])]), Message.bytes_int(msg[4:8])
+        return '.'.join([str(elem) for elem in list(decrypted_msg[:4])]), Message.bytes_int(decrypted_msg[4:8])
 
     @staticmethod
     def get_payload_to_send(decrypted_msg):

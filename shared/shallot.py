@@ -61,14 +61,16 @@ def build_shallot(ls_hops,ls_keys,message,sync=0):
 #ls_hops contains the direct path, but to build the shallot we need to reverse it
     if sync==0:
         ls_hops, ls_keys = build_list_for_shallot(ls_hops,ls_keys)
+        print(ls_keys)
 
-    if len(ls_hops)>0:
+    if len(ls_keys)>0:
         seq_nb=1 #A MODIFIER, QU EST CE QUE CA REPRESENTE
         key_id=ls_keys[0][0]
         next_hop=ls_hops[0]
         message_relay=MESSAGE_RELAY(seq_nb,key_id,next_hop,message)
         part=message_relay.to_cipher()
         ciphered=encrypt(ls_keys[0][1],part)
+        message_relay.update_length(ciphered)
         #ciphered=str(ciphered).strip("b'")
         #ciphered = ciphered.decode('unicode_escape').encode('utf-8')
         #print('ciphered:',ciphered.decode('utf-8'))
