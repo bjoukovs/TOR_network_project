@@ -19,6 +19,7 @@ class Relay(Thread):
         self._thread_running = False
         self._active_clients = []
         self.dict_keys = {} # Dict with key_id = DH Key
+        self.dict_msg = {} # Dict with msg_id = (Previous hop)
         self.is_peer = False
 
     @property
@@ -96,18 +97,28 @@ class Relay(Thread):
         print(bin(data[0]))
         msg_type = data[0]-16 # to extract type from version (=1) + type of the header
                                 #data[0] est deja un int
+        msg_id = data[1] # to extract the message id to send error back if necessary
 
         print("Message type", msg_type)
-        return payload, msg_type
+        return payload, msg_type, msg_id
 
-    def message_received(self,data,client,from_super=False,payload=None,msg_type=None):
+    def manage_error(self,data,payload,msg_id):
+        error_msg = data + payload
+        IP, PORT = self.dict_msg[msg_id]
+        sock = socket.socket(socket.AF_INET, # Internet
+                                socket.SOCK_STREAM) # TCP
+        sock.connect((IP,PORT))
+        sock.sendall(error_msg)
+        sock.close()
+
+    def message_received(self,data,client,from_super=False,payload=None,msg_type=None,msg_id=None):
         
         decrypted = None
 
         print("message received")
 
         if from_super==False:
-            payload, msg_type = self.open_message(data,client)
+            payload, msg_type, msg_id = self.open_message(data,client)
 
         print(msg_type)
 
@@ -135,12 +146,20 @@ class Relay(Thread):
             try:
                 key = self.dict_keys[key_id_received]
             except Exception:
-                error_msg = ERROR(1)
-                self.send_datagram(error_msg,client)
+                error_msg = ERROR(msg_id,1)
+                IP, PORT = self.dict_msg[msg_id]
+                sock = socket.socket(socket.AF_INET, # Internet
+                                        socket.SOCK_STREAM) # TCP
+                sock.connect((IP,PORT))
+                sock.sendall(error_msg)
+                sock.close()
             decrypted = decrypt(key,ciphered)
+            self.dict_msg[msg_id] = MESSAGE_RELAY.get_previous_hop(decrypted)
+            print("Previous hop: ",msg_id,self.dict_msg[msg_id])
             self.send_to_next_hop(decrypted)
         elif msg_type == 3:
-            pass
+            self.manage_error(data,payload,msg_id)
+
             
         return(decrypted)
 
@@ -180,9 +199,10 @@ class Relay(Thread):
                 #Si le socket qui a reçu un message est _server_socket alors il s'agit d'une demande de connexion
                 if sock is self._server_socket:
                     client_socket, address = self._server_socket.accept()
+                    port = client_socket.getsockname()
                     client_socket.setblocking(0)
                     self._active_clients.append(client_socket)
-                    print("New client connected", address)
+                    print("New client connected", address,port)
 
                 #Sinon il s'agit du socket d'un client connecté qui désire envoyer un message
                 else:

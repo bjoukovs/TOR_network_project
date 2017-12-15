@@ -40,6 +40,7 @@ class Peer(Relay):
         else:
             #Attention hops contient aussi Alice
             hops = Dijkstra(self.relay_object,dest_relay,self.network_topology)
+            print(hops)
             self.buffered_message = (message,hops)
             self.negociate_keys(hops)
 
@@ -73,10 +74,12 @@ class Peer(Relay):
         else:
             super().send_to_next_hop(decrypted)
 
+    def manage_error(self,data,payload,msg_id):
+        self.send_message(message,ip,port)
 
     def message_received(self,data,client):
         
-        payload, msg_type = self.open_message(data,client)
+        payload, msg_type, msg_id = self.open_message(data,client)
 
         #Message Key_reply
         if msg_type==1:
@@ -112,10 +115,10 @@ class Peer(Relay):
 
 
         else:
-            decrypted = super().message_received(data,client,True,payload,msg_type)
+            decrypted = super().message_received(data,client,True,payload,msg_type,msg_id)
 
             if decrypted is not None:
-                final_message = decrypted[8:]
+                final_message = decrypted[16:]
                 print(final_message)
                 self.linked_gui.receive_message(final_message.decode('utf-8'))
 

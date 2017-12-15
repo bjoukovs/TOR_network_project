@@ -1,5 +1,6 @@
 #from bitarray import bitarray
 from math import ceil
+from random import getrandbits
 
 import os,sys,inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -9,10 +10,11 @@ sys.path.insert(0,parentdir)
 from shared.config.relay_object import Relay as Relay_object
 
 class Message:
-    def __init__(self,version,type_):
+    def __init__(self,version,type_,msg_id=0):
         '''Arguments: [int] version (must be 1), [int] type = message type (KEY_INIT,KEY_REPLY,...). '''
         self.version=version
         self.type_=type_
+        self.msg_id=msg_id
 
     @staticmethod
     def int_bytes(x,length):
@@ -26,7 +28,7 @@ class Message:
 
     def byte_form(self):
         '''Return the message in his byte form with all the attributes concatenated. '''
-        byte_message = Message.int_bytes(self.version*16+self.type_,1) + bytes(1)
+        byte_message = Message.int_bytes(self.version*16+self.type_,1) + Message.int_bytes(self.msg_id,1)
         return byte_message
 
     # @staticmethod
@@ -53,16 +55,12 @@ class Message:
 class KEY_INIT(Message):
     def __init__(self,key_id,g,p,A):
         '''Arguments: [int] key_id, [int] g, [int] p, [int] A. '''
-        Message.__init__(self,1,0)
+        Message.__init__(self,1,0,getrandbits(8))
         self.msg_length=67 #dword
         self.key_id=key_id
         self.g=g
         self.p=p
         self.A=A
-    def concatene(self):
-        corpus=(bin(self.version)[2:]+bin(self.type_)[2:]+'00000000'+bin(self.msg_length)[2:]+bin(self.key_id)[2:]
-               +bin(self.g)[2:]+bin(self.p)[2:]+bin(self.A)[2:])
-        return corpus
 
     def byte_form(self):
         '''Return the message in his byte form with all the attributes concatenated. '''
@@ -92,14 +90,10 @@ class KEY_INIT(Message):
 class KEY_REPLY(Message):
     def __init__(self,key_id,B):
         '''Arguments: [int] key_id, [int] B. '''
-        Message.__init__(self,1,1)
+        Message.__init__(self,1,1,getrandbits(8))
         self.msg_length=34
         self.key_id=key_id
         self.B=B
-    def concatene(self):
-        corpus=(bin(self.version)[2:]+bin(self.type_)[2:]+'00000000'+bin(self.msg_length)[2:]+bin(self.key_id)[2:]
-                +bin(self.B)[2:])
-        return corpus
 
     def byte_form(self):
         '''Return the message in his byte form with all the attributes concatenated. '''
@@ -135,12 +129,15 @@ class KEY_REPLY(Message):
 #        return corpus
 
 class MESSAGE_RELAY(Message):
-    def __init__(self,seq_nb,key_id,nexthop,payload):
-        '''Arguments: [int] seq_nb, [int] key_id, [Tuple (IP,port)] nexthop ([String] IP, [int] port), [String||Bytes] payload. '''
-        super().__init__(1,2)
+    def __init__(self,msg_id,seq_nb,key_id,nexthop,previoushop,payload):
+        '''Arguments: [int] seq_nb, [int] key_id, [Tuple (IP,port)] nexthop ([String] IP, [int] port),
+            [Tuple (IP,port)] nexthop ([String] IP, [int] port), [String||Bytes] payload. '''
+        super().__init__(1,2,msg_id)
         self.key_id=key_id
         self.nexthop_ip=nexthop.ip
-        self.nexthop_port=nexthop.port #Currently not used since IP Address is 32 bits so no place for port!!!!!
+        self.nexthop_port=nexthop.port
+        self.previoushop_ip=previoushop.ip
+        self.previoushop_port=previoushop.port
         self.payload=payload
         self.seq_nb = 0 #2 + ceil(len(self.to_cipher())/4)
 
@@ -153,7 +150,8 @@ class MESSAGE_RELAY(Message):
 
     def to_cipher(self):
         '''Return the part of the message to cipher in his byte form with all the relevant attributes concatenated. '''
-        to_cipher = bytes([int(elem) for elem in self.nexthop_ip.split('.')]) + Message.int_bytes(self.nexthop_port,4)
+        to_cipher = (bytes([int(elem) for elem in self.nexthop_ip.split('.')]) + Message.int_bytes(self.nexthop_port,4)
+                    + bytes([int(elem) for elem in self.previoushop_ip.split('.')]) + Message.int_bytes(self.previoushop_port,4))
         if isinstance(self.payload,str):
             to_cipher += self.payload.encode('utf-8')
         elif isinstance(self.payload,bytes):
@@ -177,14 +175,19 @@ class MESSAGE_RELAY(Message):
         return '.'.join([str(elem) for elem in list(decrypted_msg[:4])]), Message.bytes_int(decrypted_msg[4:8])
 
     @staticmethod
+    def get_previous_hop(decrypted_msg):
+        '''Return the next hop IP address of the provided message. '''
+        return '.'.join([str(elem) for elem in list(decrypted_msg[8:12])]), Message.bytes_int(decrypted_msg[12:16])
+
+    @staticmethod
     def get_payload_to_send(decrypted_msg):
         '''Return the next hop IP address of the provided message. '''
-        return decrypted_msg[8:]
+        return decrypted_msg[16:]
 
 class ERROR(Message):
-    def __init__(self,error_code):
+    def __init__(self,msg_id,error_code):
         '''Arguments: [int] error_code. '''
-        Message.__init__(self,1,3)
+        Message.__init__(self,1,3,msg_id)
         self.msg_length=2
         self.error_code=error_code
         #self.padding=padding  #padding fait dans concatene
