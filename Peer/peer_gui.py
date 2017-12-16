@@ -64,7 +64,7 @@ class Peer_gui(Frame):
     def receive_message(self,message,ip='0.0.0.0',port=0000):
         #Reçoit un message depuis le relais
 
-        self.print_message(str(ip)+":"+str(port)+" -> you",0)
+        self.print_message("Message received:",0)
         self.print_message("    "+message,1)
 
 
@@ -99,5 +99,4 @@ class Peer_gui(Frame):
 
         self.print_message("-- Welcome to Shallot Messenger --",0)
         self.print_message("")
-        self.receive_message("Coucou","1.1.1.1",1000)
 
