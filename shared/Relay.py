@@ -96,6 +96,7 @@ class Relay(Thread):
         print(data[0])
         print(bin(data[0]))
         msg_version = (data[0] - data[0]%16)/16
+        print("Version : ", msg_version)
         msg_type = data[0]%16 # to extract type from version (=1) + type of the header
                                 #data[0] est deja un int
         msg_id = data[1] # to extract the message id to send error back if necessary
@@ -168,8 +169,7 @@ class Relay(Thread):
             try:
                 decrypted = decrypt(key,ciphered)
                 self.send_to_next_hop(decrypted)
-                
-                print("Version : ", msg_version)
+
                 if msg_version != 1:
                     self.send_error(msg_id,0)
             except Exception:

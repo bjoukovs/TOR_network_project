@@ -77,6 +77,7 @@ class Peer(Relay):
             super().send_to_next_hop(decrypted)
 
     def manage_error(self,data,payload,msg_id):
+        message, ip, port = self.dict_msg[msg_id]
         self.send_message(message,ip,port)
 
     def message_received(self,data,client):

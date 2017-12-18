@@ -143,7 +143,7 @@ class MESSAGE_RELAY(Message):
 
     def update_length(self,payload):
         self.payload = payload
-        length = int(2 + len(self.payload)/4)
+        length = int(4 + len(self.payload)/4)
         print(len(payload))
         print(length)
         self.seq_nb = length
