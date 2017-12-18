@@ -177,12 +177,12 @@ class MESSAGE_RELAY(Message):
     @staticmethod
     def get_previous_hop(msg):
         '''Return the previous hop IP address of the provided message. '''
-        return '.'.join([str(elem) for elem in list(msg[4:8])]), Message.bytes_int(decrypted_msg[8:12])
+        return '.'.join([str(elem) for elem in list(msg[4:8])]), Message.bytes_int(msg[8:12])
 
     @staticmethod
     def get_payload(decrypted_msg):
         '''Return the payload of the provided message. '''
-        return decrypted_msg[8:]
+        return decrypted_msg[12:]
 
 class ERROR(Message):
     def __init__(self,msg_id,error_code):

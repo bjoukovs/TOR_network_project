@@ -113,7 +113,7 @@ class Relay(Thread):
         sock.close()
 
     def send_error(self,msg_id,error_code,client=None):
-        error_msg = ERROR(msg_id,error_code)
+        error_msg = ERROR(msg_id,error_code).byte_form()
         if client is not None:
             self.send_datagram(error_msg, client)
         else:
@@ -157,6 +157,8 @@ class Relay(Thread):
 
         elif msg_type == 2: #MESSAGE_RELAY
             key_id_received, ciphered = MESSAGE_RELAY.get_key_id_and_ciphtext(payload)
+            self.dict_msg[msg_id] = MESSAGE_RELAY.get_previous_hop(payload)
+            print("Previous hop: ",msg_id,self.dict_msg[msg_id])
             print(key_id_received)
             print(self.dict_keys)
             try:
@@ -165,15 +167,14 @@ class Relay(Thread):
                 self.send_error(msg_id,1)
             try:
                 decrypted = decrypt(key,ciphered)
+                self.send_to_next_hop(decrypted)
+                
+                print("Version : ", msg_version)
+                if msg_version != 1:
+                    self.send_error(msg_id,0)
             except Exception:
                 self.send_error(msg_id,0)
-            self.dict_msg[msg_id] = MESSAGE_RELAY.get_previous_hop(decrypted)
-            print("Previous hop: ",msg_id,self.dict_msg[msg_id])
 
-            if msg_version != 1:
-                self.send_error(msg_id,0)
-
-            self.send_to_next_hop(decrypted)
         elif msg_type == 3:
             self.manage_error(data,payload,msg_id)
 
