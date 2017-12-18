@@ -80,7 +80,7 @@ class Relay(Thread):
     def send_to_next_hop(self,decrypted):
         next_hop_ip_received, next_hop_port_received = MESSAGE_RELAY.get_next_hop(decrypted)
         print('IP received:',next_hop_ip_received, 'Port received:',next_hop_port_received)
-        msg_to_send = MESSAGE_RELAY.get_payload_to_send(decrypted)
+        msg_to_send = MESSAGE_RELAY.get_payload(decrypted)
         IP = next_hop_ip_received
         PORT = next_hop_port_received #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ASK FOR PORT
         sock = socket.socket(socket.AF_INET, # Internet
@@ -164,15 +164,19 @@ class Relay(Thread):
             print(self.dict_keys)
             try:
                 key = self.dict_keys[key_id_received]
-            except Exception:
+            except Exception as e:
+                print("NO KEY",e)
                 self.send_error(msg_id,1)
             try:
                 decrypted = decrypt(key,ciphered)
-                self.send_to_next_hop(decrypted)
 
                 if msg_version != 1:
+                    print("BAD VERSION",msg_version)
                     self.send_error(msg_id,0)
-            except Exception:
+                else:
+                    self.send_to_next_hop(decrypted)
+            except Exception as e:
+                print("ERROR",e)
                 self.send_error(msg_id,0)
 
         elif msg_type == 3:
