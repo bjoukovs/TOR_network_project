@@ -57,8 +57,9 @@ class Peer(Relay):
         keys_ordered = [(x[0],x[1][3]) for x in keys_ordered]
         print(keys_ordered)
 
-
         message_to_send, msg_id = build_shallot(hops,keys_ordered,message)
+
+        self.dict_msg[msg_id] = (self.IP, int(self.PORT))
             
         sock = socket.socket(socket.AF_INET, # Internet
                                 socket.SOCK_STREAM) # TCP
@@ -78,7 +79,11 @@ class Peer(Relay):
 
     def manage_error(self,data,payload,msg_id):
         message, ip, port = self.dict_msg[msg_id]
-        self.send_message(message,ip,port)
+        if ip = self.IP and port = self.PORT:
+            print("ERROR RECEIVED")
+            print(message)
+        else:
+            super.manage_error(data,payload,msg_id)
 
     def message_received(self,data,client):
         
