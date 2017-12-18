@@ -58,7 +58,7 @@ class Peer(Relay):
         print(keys_ordered)
 
 
-        message_to_send = build_shallot(hops,keys_ordered,message)
+        message_to_send, msg_id = build_shallot(hops,keys_ordered,message)
             
         sock = socket.socket(socket.AF_INET, # Internet
                                 socket.SOCK_STREAM) # TCP
@@ -119,7 +119,7 @@ class Peer(Relay):
 
 
         else:
-            decrypted = super().message_received(data,client,True,payload,msg_type,msg_id)
+            decrypted = super().message_received(data,client,True,payload,msg_type,msg_id,msg_version)
 
             if decrypted is not None:
                 final_message = MESSAGE_RELAY.get_payload(decrypted)

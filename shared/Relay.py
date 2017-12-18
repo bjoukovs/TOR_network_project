@@ -124,7 +124,7 @@ class Relay(Thread):
             sock.sendall(error_msg)
             sock.close()
 
-    def message_received(self,data,client,from_super=False,payload=None,msg_type=None,msg_id=None):
+    def message_received(self,data,client,from_super=False,payload=None,msg_type=None,msg_id=None,msg_version=None):
         
         decrypted = None
 
