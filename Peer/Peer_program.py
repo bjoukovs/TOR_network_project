@@ -23,7 +23,7 @@ TOPOLOGY = read_config_peer()
 
 #Manual topology for less than 3 computers
 Alice = Relay_object("192.168.0.10",9000)
-Bob = Relay_object("192.168.0.24",9999)
+Bob = Relay_object("192.168.0.24",9000)
 r1 = Relay_object("192.168.0.24",9001)
 r2 = Relay_object("192.168.0.24",9002)
 Alice.connect(r1,5)
