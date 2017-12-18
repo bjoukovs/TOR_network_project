@@ -86,18 +86,23 @@ class Peer(Relay):
         else:
             ip = d[1]
             port = d[2]
-            if ip == self.IP and port == self.PORT:
+
+            if ip == self.IP and int(port) == int(self.PORT):
                 print("ERROR RECEIVED")
                 print(payload)
             else:
-                super.manage_error(data,payload,msg_id)
+                pass
+                #super().manage_error(data,payload,msg_id)
 
     def message_received(self,data,client):
         
         payload, msg_version, msg_type, msg_id = self.open_message(data,client)
 
+        if msg_type==3:
+            self.manage_error(data,payload,msg_id)
+
         #Message Key_reply
-        if msg_type==1:
+        elif msg_type==1:
 
             key_reply = KEY_REPLY.init_from_msg(payload)
             key_id = key_reply.key_id
