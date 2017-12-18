@@ -59,7 +59,8 @@ class Peer(Relay):
 
         message_to_send, msg_id = build_shallot(hops,keys_ordered,message)
 
-        self.dict_msg[msg_id] = (self.IP, int(self.PORT))
+        print("message id", msg_id)
+        self.dict_msg[msg_id] = (message,self.IP, int(self.PORT))
             
         sock = socket.socket(socket.AF_INET, # Internet
                                 socket.SOCK_STREAM) # TCP
@@ -78,12 +79,18 @@ class Peer(Relay):
             super().send_to_next_hop(decrypted)
 
     def manage_error(self,data,payload,msg_id):
-        message, ip, port = self.dict_msg[msg_id]
-        if ip = self.IP and port = self.PORT:
+        d = self.dict_msg.get(msg_id,None)
+        if d is None:
             print("ERROR RECEIVED")
-            print(message)
+            print(payload)
         else:
-            super.manage_error(data,payload,msg_id)
+            ip = d[1]
+            port = d[2]
+            if ip == self.IP and port == self.PORT:
+                print("ERROR RECEIVED")
+                print(payload)
+            else:
+                super.manage_error(data,payload,msg_id)
 
     def message_received(self,data,client):
         
