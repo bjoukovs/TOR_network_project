@@ -95,12 +95,13 @@ class Relay(Thread):
         payload = client.recv(length)
         print(data[0])
         print(bin(data[0]))
-        msg_type = data[0]-16 # to extract type from version (=1) + type of the header
+        msg_version = (data[0] - data[0]%16)/16
+        msg_type = data[0]%16 # to extract type from version (=1) + type of the header
                                 #data[0] est deja un int
         msg_id = data[1] # to extract the message id to send error back if necessary
 
         print("Message type", msg_type)
-        return payload, msg_type, msg_id
+        return payload, msg_version, msg_type, msg_id
 
     def manage_error(self,data,payload,msg_id):
         error_msg = data + payload
@@ -111,6 +112,18 @@ class Relay(Thread):
         sock.sendall(error_msg)
         sock.close()
 
+    def send_error(self,msg_id,error_code,client=None):
+        error_msg = ERROR(msg_id,error_code)
+        if client is not None:
+            self.send_datagram(error_msg, client):
+        else:
+            IP, PORT = self.dict_msg[msg_id]
+            sock = socket.socket(socket.AF_INET, # Internet
+                                    socket.SOCK_STREAM) # TCP
+            sock.connect((IP,PORT))
+            sock.sendall(error_msg)
+            sock.close()
+
     def message_received(self,data,client,from_super=False,payload=None,msg_type=None,msg_id=None):
         
         decrypted = None
@@ -118,11 +131,14 @@ class Relay(Thread):
         print("message received")
 
         if from_super==False:
-            payload, msg_type, msg_id = self.open_message(data,client)
+            payload, msg_version, msg_type, msg_id = self.open_message(data,client)
 
         print(msg_type)
 
         if msg_type == 0: #KEY_INIT
+            if msg_version != 1:
+                self.send_error(msg_id,0,client)
+
             key_init = KEY_INIT.init_from_msg(payload)
             b = generate_random_nb(8)
             key = DH_shared_secret(key_init.A,b,key_init.p)
@@ -146,16 +162,17 @@ class Relay(Thread):
             try:
                 key = self.dict_keys[key_id_received]
             except Exception:
-                error_msg = ERROR(msg_id,1)
-                IP, PORT = self.dict_msg[msg_id]
-                sock = socket.socket(socket.AF_INET, # Internet
-                                        socket.SOCK_STREAM) # TCP
-                sock.connect((IP,PORT))
-                sock.sendall(error_msg)
-                sock.close()
-            decrypted = decrypt(key,ciphered)
+                self.send_error(msg_id,1)
+            try:
+                decrypted = decrypt(key,ciphered)
+            except Exception:
+                self.send_error(msg_id,0)
             self.dict_msg[msg_id] = MESSAGE_RELAY.get_previous_hop(decrypted)
             print("Previous hop: ",msg_id,self.dict_msg[msg_id])
+
+            if msg_version != 1:
+                self.send_error(msg_id,0)
+
             self.send_to_next_hop(decrypted)
         elif msg_type == 3:
             self.manage_error(data,payload,msg_id)

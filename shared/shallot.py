@@ -87,4 +87,4 @@ def build_shallot(ls_hops,ls_keys,message,sync=0,msg_id=0):
         return build_shallot(ls_hops,ls_keys,total_message,sync,msg_id)
 
     elif len(ls_keys)==0: #quand ca arrive chez Alice
-        return message
+        return message, msg_id

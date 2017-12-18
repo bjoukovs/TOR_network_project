@@ -25,6 +25,8 @@ class Peer(Relay):
         #Selection du relais qui correspond au peer
         self.relay_object = Relay_object.select_relay(topology,ip,port)
         print(self.relay_object)
+
+        self.dict_msg = {} #Stock les messages envoyés avec leur id
         
 
 
@@ -79,7 +81,7 @@ class Peer(Relay):
 
     def message_received(self,data,client):
         
-        payload, msg_type, msg_id = self.open_message(data,client)
+        payload, msg_version, msg_type, msg_id = self.open_message(data,client)
 
         #Message Key_reply
         if msg_type==1:
@@ -120,7 +122,7 @@ class Peer(Relay):
             decrypted = super().message_received(data,client,True,payload,msg_type,msg_id)
 
             if decrypted is not None:
-                final_message = decrypted[16:]
+                final_message = MESSAGE_RELAY.get_payload(decrypted)
                 print(final_message)
                 self.linked_gui.receive_message(final_message.decode('utf-8'))
 

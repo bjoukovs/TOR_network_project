@@ -150,8 +150,7 @@ class MESSAGE_RELAY(Message):
 
     def to_cipher(self):
         '''Return the part of the message to cipher in his byte form with all the relevant attributes concatenated. '''
-        to_cipher = (bytes([int(elem) for elem in self.nexthop_ip.split('.')]) + Message.int_bytes(self.nexthop_port,4)
-                    + bytes([int(elem) for elem in self.previoushop_ip.split('.')]) + Message.int_bytes(self.previoushop_port,4))
+        to_cipher = (bytes([int(elem) for elem in self.nexthop_ip.split('.')]) + Message.int_bytes(self.nexthop_port,4))
         if isinstance(self.payload,str):
             to_cipher += self.payload.encode('utf-8')
         elif isinstance(self.payload,bytes):
@@ -162,12 +161,13 @@ class MESSAGE_RELAY(Message):
         '''Return the plain-text part of the message in his byte form with all the relevant attributes concatenated. '''
         byte_message = super().byte_form()
         byte_message += Message.int_bytes(self.seq_nb,2) + Message.int_bytes(self.key_id,4)
+        byte_message += bytes([int(elem) for elem in self.previoushop_ip.split('.')]) + Message.int_bytes(self.previoushop_port,4)
         return byte_message
 
     @staticmethod
     def get_key_id_and_ciphtext(msg):
         '''Return the key ID and the ciphered part of the provided message in a tuple (key ID,ciphered part). '''
-        return Message.bytes_int(msg[:4]),msg[4:]
+        return Message.bytes_int(msg[:4]),msg[12:]
 
     @staticmethod
     def get_next_hop(decrypted_msg):
@@ -175,14 +175,14 @@ class MESSAGE_RELAY(Message):
         return '.'.join([str(elem) for elem in list(decrypted_msg[:4])]), Message.bytes_int(decrypted_msg[4:8])
 
     @staticmethod
-    def get_previous_hop(decrypted_msg):
-        '''Return the next hop IP address of the provided message. '''
-        return '.'.join([str(elem) for elem in list(decrypted_msg[8:12])]), Message.bytes_int(decrypted_msg[12:16])
+    def get_previous_hop(msg):
+        '''Return the previous hop IP address of the provided message. '''
+        return '.'.join([str(elem) for elem in list(msg[4:8])]), Message.bytes_int(decrypted_msg[8:12])
 
     @staticmethod
-    def get_payload_to_send(decrypted_msg):
-        '''Return the next hop IP address of the provided message. '''
-        return decrypted_msg[16:]
+    def get_payload(decrypted_msg):
+        '''Return the payload of the provided message. '''
+        return decrypted_msg[8:]
 
 class ERROR(Message):
     def __init__(self,msg_id,error_code):
