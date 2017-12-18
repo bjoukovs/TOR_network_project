@@ -115,7 +115,7 @@ class Relay(Thread):
     def send_error(self,msg_id,error_code,client=None):
         error_msg = ERROR(msg_id,error_code)
         if client is not None:
-            self.send_datagram(error_msg, client):
+            self.send_datagram(error_msg, client)
         else:
             IP, PORT = self.dict_msg[msg_id]
             sock = socket.socket(socket.AF_INET, # Internet
