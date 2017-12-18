@@ -109,7 +109,9 @@ class Peer(Relay):
                     break
             print(all_negociated)
 
-            if all_negociated:
+            print(len(self.keys),self.keys_to_negociate)
+
+            if all_negociated and len(self.keys)==self.keys_to_negociate:
                 print("all keys negociated")
                 self.when_keys_negociated()
 
@@ -126,6 +128,7 @@ class Peer(Relay):
     def negociate_keys(self,hops):
         ls_keys=[]
         self.keys = {}
+        self.keys_to_negociate = len(hops)-1 #Tous les hops sauf alice
 
         #hops[0] is Alice
         for i in range(1,len(hops)):

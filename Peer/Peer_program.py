@@ -20,6 +20,20 @@ host_data = read_config_host()
 IP = host_data[0]    #String
 PORT = host_data[1]  #Integer
 TOPOLOGY = read_config_peer()
+
+#Manual topology for less than 3 computers
+Alice = Relay_object("192.168.0.10",9000)
+Bob = Relay_object("192.168.0.24",9999)
+r1 = Relay_object("192.168.0.24",9001)
+r2 = Relay_object("192.168.0.24",9002)
+Alice.connect(r1,5)
+r1.connect(r2,5)
+r2.connect(Bob,5)
+TOPOLOGY = {}
+TOPOLOGY["192.168.0.10"] = [Alice]
+TOPOLOGY["192.168.0.24"] = [r1,r2,Bob]
+
+
 PEER = Peer(IP,PORT,TOPOLOGY) #Objet peer héritant de la classe Relay
 
 #Initialisation du relais interne du peer
