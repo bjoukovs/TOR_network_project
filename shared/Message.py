@@ -182,7 +182,7 @@ class MESSAGE_RELAY(Message):
     @staticmethod
     def get_payload(decrypted_msg):
         '''Return the payload of the provided message. '''
-        return decrypted_msg[12:]
+        return decrypted_msg[8:]
 
 class ERROR(Message):
     def __init__(self,msg_id,error_code):
