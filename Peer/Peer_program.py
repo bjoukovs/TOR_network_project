@@ -7,7 +7,7 @@ import atexit
 import os,sys,inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir) 
+sys.path.insert(0,parentdir)
 
 from shared.Relay import Relay as Relay
 from shared.config.peer_config import read_config as read_config_peer
@@ -22,14 +22,14 @@ PORT = host_data[1]  #Integer
 TOPOLOGY = read_config_peer()
 
 #Manual topology for less than 3 computers
-Alice = Relay_object("192.168.0.10",9000)
-Bob = Relay_object("192.168.0.25",9000)
-r1 = Relay_object("192.168.0.25",9001)
-Alice.connect(r1,5)
-r1.connect(Bob,5)
-TOPOLOGY = {}
-TOPOLOGY["192.168.0.10"] = [Alice]
-TOPOLOGY["192.168.0.25"] = [r1,Bob]
+# Alice = Relay_object("192.168.0.10",9000)
+# Bob = Relay_object("192.168.0.25",9000)
+# r1 = Relay_object("192.168.0.25",9001)
+# Alice.connect(r1,5)
+# r1.connect(Bob,5)
+# TOPOLOGY = {}
+# TOPOLOGY["192.168.0.10"] = [Alice]
+# TOPOLOGY["192.168.0.25"] = [r1,Bob]
 
 
 PEER = Peer(IP,PORT,TOPOLOGY) #Objet peer héritant de la classe Relay
@@ -52,7 +52,7 @@ atexit.register(close_peer)
 GUI = Tk()
 GUI.geometry("400x300+300+300")
 app = Peer_gui(PEER)
-GUI.mainloop() 
+GUI.mainloop()
 
 #####
 
