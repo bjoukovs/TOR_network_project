@@ -1,6 +1,6 @@
 To launch this shallot network on a single computer, and to allow relays not to be 
 all neigbor of each others:
-1) Copy the program folder as many times as the number of wanted relays, and at least to time to
+1) Copy the program folder as many times as the number of wanted relays, and at least 2 times to
    have 2 Peers.
 
 2) In the first and the second copy, go in Peer_program.py and implement manually the Peers,
